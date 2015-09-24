@@ -66,6 +66,8 @@ private:
     GLuint m_VMatrixUniform; // view matrix
     GLuint m_PMatrixUniform; // projection matrix
 
+    GLuint m_triangleVbo;
+
     QOpenGLShaderProgram *m_program;
 
     // for storing triangle vertices and colours

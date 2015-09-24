@@ -41,6 +41,42 @@ void Renderer::initializeGL()
     m_MMatrixUniform = m_program->uniformLocation("model_matrix");
     m_programID = m_program->programId();
 
+    // Setup the triangles
+    generateBorderTriangles();
+    long cBufferSize = triColours.size() * sizeof(float),
+        vBufferSize = triVertices.size() * sizeof(float),
+        nBufferSize = triNormals.size() * sizeof(float);
+
+    // Initialize VBOs
+    glGenBuffers(1, &this->m_triangleVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, this->m_triangleVbo);
+
+    // Allocate space
+    glBufferData(GL_ARRAY_BUFFER,
+                 vBufferSize + cBufferSize + nBufferSize,
+                 NULL,
+                 GL_STATIC_DRAW);
+
+    // Uplaod the data to the PGU
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &triVertices[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &triColours[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &triNormals[0]);
+
+    //Enable the attribute arrays
+    glEnableVertexAttribArray(this->m_posAttr);
+    glEnableVertexAttribArray(this->m_colAttr);
+    glEnableVertexAttribArray(this->m_norAttr);
+
+    // Specify where these are in the VBO
+    glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)0);
+    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
+    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
+
+    glDisableVertexAttribArray(this->m_posAttr);
+    glDisableVertexAttribArray(this->m_colAttr);
+    glDisableVertexAttribArray(this->m_norAttr);
+
+    //documentation glVertexAttribPointer, gl(enable/disable)vertexAttribArray
 }
 
 // called by the Qt GUI system, to allow OpenGL drawing commands
@@ -80,6 +116,20 @@ void Renderer::paintGL()
     // Here's some test code that draws red triangles at the
     // corners of the game board.
 
+    glBindBuffer(GL_ARRAY_BUFFER, this->m_triangleVbo);
+
+    // Enable the attribute arrays
+    glEnableVertexAttribArray(this->m_posAttr);
+    glEnableVertexAttribArray(this->m_colAttr);
+    glEnableVertexAttribArray(this->m_norAttr);
+
+    // Draw the triangles
+    glDrawArrays(GL_TRIANGLES, 0, triVertices.size()/3);
+
+    glDisableVertexAttribArray(this->m_norAttr);
+    glDisableVertexAttribArray(this->m_colAttr);
+    glDisableVertexAttribArray(this->m_posAttr);
+
 //    generateBorderTriangles();
 
 //    // draw border
@@ -103,22 +153,22 @@ void Renderer::paintGL()
 //        glDisableVertexAttribArray(m_posAttr);
 //    }
 
-    generateCube();
+//    generateCube();
 
-    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, &vertices[0]);
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, &colours[0]);
-    glVertexAttribPointer(m_norAttr, 3, GL_FLOAT, GL_FALSE, 0, &normals[0]);
+//    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, &vertices[0]);
+//    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, &colours[0]);
+//    glVertexAttribPointer(m_norAttr, 3, GL_FLOAT, GL_FALSE, 0, &normals[0]);
 
-    glEnableVertexAttribArray(m_posAttr);
-    glEnableVertexAttribArray(m_colAttr);
-    glEnableVertexAttribArray(m_norAttr);
+//    glEnableVertexAttribArray(m_posAttr);
+//    glEnableVertexAttribArray(m_colAttr);
+//    glEnableVertexAttribArray(m_norAttr);
 
-    // draw triangles
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size()/3); // 3 coordinates per vertex
+//    // draw triangles
+//    glDrawArrays(GL_TRIANGLES, 0, vertices.size()/3); // 3 coordinates per vertex
 
-    glDisableVertexAttribArray(m_norAttr);
-    glDisableVertexAttribArray(m_colAttr);
-    glDisableVertexAttribArray(m_posAttr);
+//    glDisableVertexAttribArray(m_norAttr);
+//    glDisableVertexAttribArray(m_colAttr);
+//    glDisableVertexAttribArray(m_posAttr);
 
     // deactivate the program
     m_program->release();
