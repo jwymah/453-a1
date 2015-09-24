@@ -1,0 +1,5 @@
+use GL_DRAW_TRIANGLE
+
+can also use GL_DRAW_QUAD which draws quadrilaterals 
+QMatrix4x4
+useful matrix Qmatrix class for matrices

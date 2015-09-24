@@ -68,6 +68,8 @@ private:
 
     GLuint m_triangleVbo;
 
+    GLuint m_boxVbo;
+
     QOpenGLShaderProgram *m_program;
 
     // for storing triangle vertices and colours
@@ -86,6 +88,9 @@ private:
     void generateBorderTriangles();
 
     void generateCube();
+
+    void setupBox();
+    void drawBox();
 
 };
 

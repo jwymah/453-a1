@@ -13,6 +13,40 @@ Renderer::Renderer(QWidget *parent)
 
 }
 
+// Define the box's geometry (as triangles), normals, and colour
+const float half_box_coords[] = {
+    0.,1.,0.,  1.,1.,0.,  0.,1.,1.,
+    1.,1.,0.,  1.,1.,1.,  0.,1.,1.,
+
+    1.,1.,0.,  1.,0.,1.,  1.,1.,1.,
+    1.,1.,0.,  1.,0.,0.,  1.,0.,1.,
+
+    1.,1.,1.,  1.,0.,1.,  0.,1.,1.,
+    1.,0.,1.,  0.,0.,1.,  0.,1.,1.,
+};
+
+const float half_box_norms[] = {
+    0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,
+
+    1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,
+
+    0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,
+};
+
+const float half_box_cols_green[] = {
+    0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,
+
+    0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,
+
+    0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,
+};
+
 // constructor
 Renderer::~Renderer()
 {
@@ -295,4 +329,56 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
 {
     QTextStream cout(stdout);
     cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
+}
+
+void Renderer::setupBox()
+{
+    long cBufferSize = sizeof(half_box_cols_green) * sizeof(float),
+        vBufferSize = sizeof(half_box_coords) * sizeof(float),
+        nBufferSize = sizeof(half_box_norms) * sizeof(float);
+
+    glGenBuffers(1, &this->m_boxVbo[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, this->m_boxVbo[0]);
+
+    // Allocate buffer
+    glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL,
+        GL_STATIC_DRAW);
+
+    // Upload the data to the GPU
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &half_box_coords[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &half_box_cols_green[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize,
+        &half_box_norms[0]);
+}
+
+void Renderer::drawBox()
+{
+    long cBufferSize = sizeof(half_box_cols_green) * sizeof(float),
+        vBufferSize = sizeof(half_box_coords) * sizeof(float),
+        nBufferSize = sizeof(half_box_norms) * sizeof(float);
+
+    // Bind to the correct context
+    glBindBuffer(GL_ARRAY_BUFFER, this->m_boxVbo);
+
+    // Enable the attribute arrays
+    glEnableVertexAttribArray(this->m_posAttr);
+    glEnableVertexAttribArray(this->m_colAttr);
+    glEnableVertexAttribArray(this->m_norAttr);
+
+    // Specifiy where these are in the VBO
+    glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE,
+        (const GLvoid*)0);
+
+    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE,
+        (const GLvoid*)(vBufferSize));
+
+    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE,
+        (const GLvoid*)(vBufferSize + cBufferSize));
+
+    // Draw the triangles
+    glDrawArrays(GL_TRIANGLES, 0, 18); // 18 vertices
+
+    glDisableVertexAttribArray(m_norAttr);
+    glDisableVertexAttribArray(m_colAttr);
+    glDisableVertexAttribArray(m_posAttr);
 }
