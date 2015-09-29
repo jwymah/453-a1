@@ -31,6 +31,8 @@ public:
     // destructor
     virtual ~Renderer();
 
+    void drawBorder();
+    void setupBorder();
 protected:
 
     // override fundamental drawing functions
@@ -59,16 +61,19 @@ private:
 
     // member variables for shader manipulation
     GLuint m_programID;
-    GLuint m_posAttr;
-    GLuint m_colAttr;
-    GLuint m_norAttr;
     GLuint m_MMatrixUniform; // model matrix
     GLuint m_VMatrixUniform; // view matrix
     GLuint m_PMatrixUniform; // projection matrix
 
     GLuint m_triangleVbo;
+    GLuint m_posAttr;
+    GLuint m_colAttr;
+    GLuint m_norAttr;
 
     GLuint m_boxVbo;
+    GLuint m_posAttrb;
+    GLuint m_colAttrb;
+    GLuint m_norAttrb;
 
     QOpenGLShaderProgram *m_program;
 
@@ -81,13 +86,17 @@ private:
     vector<GLfloat> colours;
     vector<GLfloat> normals;
 
+    long boxSize;
+    long borderSize;
+
     // helper function for loading shaders
     GLuint loadShader(GLenum type, const char *source);
 
     // helper function for drawing bordering triangles
     void generateBorderTriangles();
 
-    void generateCube();
+    void setupBorderTriangles();
+    void drawBorderTriangles();
 
     void setupBox();
     void drawBox();
