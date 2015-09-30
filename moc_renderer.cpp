@@ -76,8 +76,8 @@ void *Renderer::qt_metacast(const char *_clname)
     if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_Renderer.stringdata0))
         return static_cast<void*>(const_cast< Renderer*>(this));
-    if (!strcmp(_clname, "QOpenGLFunctions"))
-        return static_cast< QOpenGLFunctions*>(const_cast< Renderer*>(this));
+    if (!strcmp(_clname, "QOpenGLFunctions_4_2_Core"))
+        return static_cast< QOpenGLFunctions_4_2_Core*>(const_cast< Renderer*>(this));
     return QOpenGLWidget::qt_metacast(_clname);
 }
 

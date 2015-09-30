@@ -10,15 +10,18 @@
 
 #include <QWidget>
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions>
+//#include <QOpenGLFunctions>
+#include <QOpenGLFunctions_4_2_Core>
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLShader>
 #include <QMouseEvent>
+#include <glm/glm.hpp>
+#include "glm/gtc/matrix_transform.hpp"
 
 using namespace std;
 
-class Renderer : public QOpenGLWidget, protected QOpenGLFunctions
+class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_2_Core
 {
 
     // informs the qmake that a Qt moc_* file will need to be generated
@@ -71,9 +74,11 @@ private:
     GLuint m_norAttr;
 
     GLuint m_boxVbo;
-    GLuint m_posAttrb;
-    GLuint m_colAttrb;
-    GLuint m_norAttrb;
+
+    GLuint m_boxVao;
+    GLuint m_triangleVao;
+
+    GLuint m_borderUVaos[54];
 
     QOpenGLShaderProgram *m_program;
 
@@ -100,6 +105,11 @@ private:
 
     void setupBox();
     void drawBox();
+
+    void setupUBorder();
+    void drawUBorder();
+
+    void bindit();
 
 };
 

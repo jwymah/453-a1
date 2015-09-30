@@ -14,7 +14,7 @@ Renderer::Renderer(QWidget *parent)
 }
 
 // Define the box's geometry (as triangles), normals, and colour
-const float half_box_coords[] = {
+const float unitCube[] = {
 
     0.,1.,0.,  1.,1.,0.,  1.,0.,0.,  // back
     0.,1.,0.,  0.,0.,0.,  1.,0.,0.,
@@ -25,8 +25,8 @@ const float half_box_coords[] = {
     0.,1.,0.,  0.,0.,1.,  0.,1.,1., // left
     0.,1.,0.,  0.,0.,0.,  0.,0.,1.,
 
-    0.,1.,0.,  1.,1.,0.,  0.,1.,1., // top
-    1.,1.,0.,  1.,1.,1.,  0.,1.,1.,
+    0.,1.,0.,  0.,0.,0.,  1.,0.,0., // top
+    0.,1.,0.,  0.,0.,0.,  1.,0.,0.,
 
     1.,1.,0.,  1.,0.,1.,  1.,1.,1., // right
     1.,1.,0.,  1.,0.,0.,  1.,0.,1.,
@@ -35,26 +35,44 @@ const float half_box_coords[] = {
     1.,0.,1.,  0.,0.,1.,  0.,1.,1.,
 };
 
-const float half_box_norms[] = {
-    0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,
+const float cubeNorms[] = {
+    0,-1,0,  0,-1,0,  0,-1,0,
+    0,-1,0,  0,-1,0,  0,-1,0,
 
-    1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,
+    -1,0,0,  -1,0,0,  -1,0,0,
+    -1,0,0,  -1,0,0,  -1,0,0,
+
+    0,0,-1,  0,0,-1,  0,0,-1,
+    0,0,-1,  0,0,-1,  0,0,-1,
+
+    0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,
+
+    0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,
 
     0,0,1,  0,0,1,  0,0,1,
     0,0,1,  0,0,1,  0,0,1,
 };
 
-const float half_box_cols_green[] = {
-    0,1,0,  0,1,0,  0,1,0,
+const float cubeColors[] = {
+    1,1,1,  1,1,1,  1,1,1, // back
+    1,1,1,  1,1,1,  1,1,1,
+
+    1,1,0,  1,1,0,  1,1,0, // bottom
+    1,1,0,  1,1,0,  1,1,0,
+
+    1,0,1,  1,0,1,  1,0,1, // left
+    1,0,1,  1,0,1,  1,0,1,
+
+    1,0,0,  1,0,0,  1,0,0,  // top
+    1,0,0,  1,0,0,  1,0,0,
+
+    0,1,0,  0,1,0,  0,1,0,  // right
     0,1,0,  0,1,0,  0,1,0,
 
-    0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,
-
-    0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,
+    0,0,1,  0,0,1,  0,0,1,  //front
+    0,0,1,  0,0,1,  0,0,1,
 };
 
 // constructor
@@ -88,7 +106,10 @@ void Renderer::initializeGL()
     // Setup the triangles
     setupBorderTriangles();
 
-    setupBox();
+//    setupBox();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    setupUBorder();
 }
 
 // called by the Qt GUI system, to allow OpenGL drawing commands
@@ -108,6 +129,8 @@ void Renderer::paintGL()
 
     QMatrix4x4 view_matrix;
     view_matrix.translate(0.0f, 0.0f, -40.0f);
+//    view_matrix.rotate(30, 1.0, 1.0, 0.0);
+
     glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
 
     // Not implemented: set up lighting (if necessary)
@@ -130,16 +153,9 @@ void Renderer::paintGL()
 
     drawBorderTriangles();
 
-    drawBox();
-
-    QMatrix4x4 boxTrans;
-    boxTrans.translate(5.0f, 5.0f, 5.0f);
-
-//    half_box_coords = half_box_coords * boxTrans;
+    drawUBorder();
 
 //    drawBox();
-
-//    generateBorderTriangles();
 
     // deactivate the program
     m_program->release();
@@ -177,8 +193,8 @@ void Renderer::generateBorderTriangles()
     // add vertices to rectangle list
     float vectList [] = {
         0.0, 0.0, 0.0,  // bottom left triangle
-        5.0, 0.0, 0.0,
-        0.0, 5.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
 
         9.0, 0.0, 0.0,  // bottom right triangle
         10.0, 0.0, 0.0,
@@ -225,19 +241,7 @@ void Renderer::setupBorderTriangles()
     glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &triColours[0]);
     glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &triNormals[0]);
 
-    //Enable the attribute arrays
-    glEnableVertexAttribArray(this->m_posAttr);
-    glEnableVertexAttribArray(this->m_colAttr);
-    glEnableVertexAttribArray(this->m_norAttr);
-
-    // Specify where these are in the VBO
-    glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)0);
-    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
-    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
-
-    glDisableVertexAttribArray(this->m_posAttr);
-    glDisableVertexAttribArray(this->m_colAttr);
-    glDisableVertexAttribArray(this->m_norAttr);
+    bindit();
 }
 
 void Renderer::drawBorderTriangles()
@@ -269,6 +273,14 @@ void Renderer::mousePressEvent(QMouseEvent * event)
 {
     QTextStream cout(stdout);
     cout << "Stub: Button " << event->button() << " pressed.\n";
+    QMatrix4x4 view_matrix;
+    view_matrix.translate(0.0f, 0.0f, -40.0f);
+    view_matrix.rotate(30, 1.0, 1.0, 0.0);
+
+    glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
+
+    paintGL();
+
 }
 
 // override mouse release event
@@ -287,9 +299,9 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
 
 void Renderer::setupBox()
 {
-    long cBufferSize = sizeof(half_box_cols_green) * sizeof(float),
-        vBufferSize = sizeof(half_box_coords) * sizeof(float),
-        nBufferSize = sizeof(half_box_norms) * sizeof(float);
+    long cBufferSize = sizeof(cubeColors) * sizeof(float),
+        vBufferSize = sizeof(unitCube) * sizeof(float),
+        nBufferSize = sizeof(cubeNorms) * sizeof(float);
 
     glGenBuffers(1, &this->m_boxVbo);
     glBindBuffer(GL_ARRAY_BUFFER, this->m_boxVbo);
@@ -298,31 +310,33 @@ void Renderer::setupBox()
     glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL,
         GL_STATIC_DRAW);
 
+
+//    glm::mat4 trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+//    glm::mat4 trans = glm::translate(glm::mat4(), glm::vec3(2.0f, 2.0f, 2.0f));
+
+//    for (int i=0; i<108; i+=3)
+//    {
+//        glm::vec4 result = trans * glm::vec4(unitCube[i], unitCube[i+1], unitCube[i+2], 1.0f);
+//        unitCube[i] = result.x;
+//        unitCube[i+1] = result.y;
+//        unitCube[i+2] = result.z;
+//        cout << unitCube[i] << "," << unitCube[i+1] << "," << unitCube[i+2] << endl;
+//    }
+
     // Upload the data to the GPU
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &half_box_coords[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &half_box_cols_green[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &half_box_norms[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &unitCube[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &cubeColors[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
 
-    //Enable the attribute arrays
-    glEnableVertexAttribArray(this->m_posAttr);
-    glEnableVertexAttribArray(this->m_colAttr);
-    glEnableVertexAttribArray(this->m_norAttr);
-
-    // Specifiy where these are in the VBO
-    glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(0));
-    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
-    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
-
-    glDisableVertexAttribArray(this->m_posAttr);
-    glDisableVertexAttribArray(this->m_colAttr);
-    glDisableVertexAttribArray(this->m_norAttr);
+    bindit();
 }
 
 void Renderer::drawBox()
 {
-    long cBufferSize = sizeof(half_box_cols_green) * sizeof(float),
-        vBufferSize = sizeof(half_box_coords) * sizeof(float),
-        nBufferSize = sizeof(half_box_norms) * sizeof(float);
+    long cBufferSize = sizeof(cubeColors) * sizeof(float),
+        vBufferSize = sizeof(unitCube) * sizeof(float),
+        nBufferSize = sizeof(cubeNorms) * sizeof(float);
     boxSize = vBufferSize + cBufferSize + nBufferSize;
 
     // Bind to the correct context
@@ -340,6 +354,144 @@ void Renderer::drawBox()
 
     // Draw the triangles
     glDrawArrays(GL_TRIANGLES, 0, 36); // 36 vertices
+
+    glDisableVertexAttribArray(this->m_posAttr);
+    glDisableVertexAttribArray(this->m_colAttr);
+    glDisableVertexAttribArray(this->m_norAttr);
+}
+
+void Renderer::setupUBorder()
+{
+    long cBufferSize = sizeof(cubeColors) * sizeof(float),
+        vBufferSize = sizeof(unitCube) * sizeof(float),
+        nBufferSize = sizeof(cubeNorms) * sizeof(float);
+
+    float translatedCube[108];
+    for (int k=0; k<22; k++)
+    {
+        glGenBuffers(1, &this->m_borderUVaos[k]);
+        glBindBuffer(GL_ARRAY_BUFFER, this->m_borderUVaos[k]);
+
+            // Allocate buffer
+            glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL, GL_STATIC_DRAW);
+
+            // translation matrix
+            glm::mat4 trans = glm::translate(glm::mat4(), glm::vec3(-1.0f, (float) k-1, 0.0f));
+
+            for (int i=0; i<108; i+=3)
+            {
+                glm::vec4 result = trans * glm::vec4(unitCube[i], unitCube[i+1], unitCube[i+2], 1.0f);
+                translatedCube[i] = result.x;
+                translatedCube[i+1] = result.y;
+                translatedCube[i+2] = result.z;
+            }
+
+            // Upload the data to the GPU
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &translatedCube[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &cubeColors[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
+
+            bindit();
+    }
+    for (int k=0; k<10; k++)
+    {
+        glGenBuffers(1, &this->m_borderUVaos[k+22]);
+        glBindBuffer(GL_ARRAY_BUFFER, this->m_borderUVaos[k+22]);
+
+            // Allocate buffer
+            glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL, GL_STATIC_DRAW);
+
+            // translation matrix
+            glm::mat4 trans = glm::translate(glm::mat4(), glm::vec3((float) k, -1.0f, 0.0f));
+
+            for (int i=0; i<108; i+=3)
+            {
+                glm::vec4 result = trans * glm::vec4(unitCube[i], unitCube[i+1], unitCube[i+2], 1.0f);
+                translatedCube[i] = result.x;
+                translatedCube[i+1] = result.y;
+                translatedCube[i+2] = result.z;
+            }
+
+            // Upload the data to the GPU
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &translatedCube[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &cubeColors[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
+
+            bindit();
+    }
+    for (int k=0; k<22; k++)
+    {
+        glGenBuffers(1, &this->m_borderUVaos[k+32]);
+        glBindBuffer(GL_ARRAY_BUFFER, this->m_borderUVaos[k+32]);
+
+            // Allocate buffer
+            glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL, GL_STATIC_DRAW);
+
+            // translation matrix
+            glm::mat4 trans = glm::translate(glm::mat4(), glm::vec3(10.0f, (float) k-1, 0.0f));
+
+            for (int i=0; i<108; i+=3)
+            {
+                glm::vec4 result = trans * glm::vec4(unitCube[i], unitCube[i+1], unitCube[i+2], 1.0f);
+                translatedCube[i] = result.x;
+                translatedCube[i+1] = result.y;
+                translatedCube[i+2] = result.z;
+            }
+
+            // Upload the data to the GPU
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &translatedCube[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &cubeColors[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
+
+            bindit();
+    }
+}
+
+void Renderer::drawUBorder()
+{
+    long cBufferSize = sizeof(cubeColors) * sizeof(float),
+        vBufferSize = sizeof(unitCube) * sizeof(float),
+        nBufferSize = sizeof(cubeNorms) * sizeof(float);
+    boxSize = vBufferSize + cBufferSize + nBufferSize;
+
+    for (int k=0; k<54; k++)
+    {
+        // Bind to the correct context
+        glBindBuffer(GL_ARRAY_BUFFER, this->m_borderUVaos[k]);
+
+        // Enable the attribute arrays
+        glEnableVertexAttribArray(this->m_posAttr);
+        glEnableVertexAttribArray(this->m_colAttr);
+        glEnableVertexAttribArray(this->m_norAttr);
+
+        // Specifiy where these are in the VBO
+        glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(0));
+        glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
+        glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
+
+        // Draw the triangles
+        glDrawArrays(GL_TRIANGLES, 0, 36); // 36 vertices
+
+        glDisableVertexAttribArray(this->m_posAttr);
+        glDisableVertexAttribArray(this->m_colAttr);
+        glDisableVertexAttribArray(this->m_norAttr);
+    }
+}
+
+void Renderer::bindit()
+{
+    long cBufferSize = sizeof(cubeColors) * sizeof(float),
+        vBufferSize = sizeof(unitCube) * sizeof(float);
+
+    //Enable the attribute arrays
+    glEnableVertexAttribArray(this->m_posAttr);
+    glEnableVertexAttribArray(this->m_colAttr);
+    glEnableVertexAttribArray(this->m_norAttr);
+
+    // Specifiy where these are in the VBO
+    glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(0));
+    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
+    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
 
     glDisableVertexAttribArray(this->m_posAttr);
     glDisableVertexAttribArray(this->m_colAttr);
