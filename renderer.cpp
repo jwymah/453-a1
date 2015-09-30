@@ -103,11 +103,17 @@ void Renderer::initializeGL()
     m_MMatrixUniform = m_program->uniformLocation("model_matrix");
     m_programID = m_program->programId();
 
+    rotationOnX = 0;
+
     // Setup the triangles
     setupBorderTriangles();
 
-//    setupBox();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // Wireframe
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    // for overlapping stuff
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     setupUBorder();
 }
@@ -129,7 +135,7 @@ void Renderer::paintGL()
 
     QMatrix4x4 view_matrix;
     view_matrix.translate(0.0f, 0.0f, -40.0f);
-//    view_matrix.rotate(30, 1.0, 1.0, 0.0);
+    view_matrix.rotate(rotationOnX, 1.0, 0.0, 0.0);
 
     glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
 
@@ -158,7 +164,7 @@ void Renderer::paintGL()
 //    drawBox();
 
     // deactivate the program
-    m_program->release();
+//    m_program->release();
 }
 
 // called by the Qt GUI system, to allow OpenGL to respond to widget resizing
@@ -309,20 +315,6 @@ void Renderer::setupBox()
     // Allocate buffer
     glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL,
         GL_STATIC_DRAW);
-
-
-//    glm::mat4 trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-//    glm::mat4 trans = glm::translate(glm::mat4(), glm::vec3(2.0f, 2.0f, 2.0f));
-
-//    for (int i=0; i<108; i+=3)
-//    {
-//        glm::vec4 result = trans * glm::vec4(unitCube[i], unitCube[i+1], unitCube[i+2], 1.0f);
-//        unitCube[i] = result.x;
-//        unitCube[i+1] = result.y;
-//        unitCube[i+2] = result.z;
-//        cout << unitCube[i] << "," << unitCube[i+1] << "," << unitCube[i+2] << endl;
-//    }
 
     // Upload the data to the GPU
     glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &unitCube[0]);
@@ -496,4 +488,10 @@ void Renderer::bindit()
     glDisableVertexAttribArray(this->m_posAttr);
     glDisableVertexAttribArray(this->m_colAttr);
     glDisableVertexAttribArray(this->m_norAttr);
+}
+
+void Renderer::rotate10()
+{
+    rotationOnX = (rotationOnX + 10) % 360;
+    paintGL();
 }

@@ -36,6 +36,7 @@ public:
 
     void drawBorder();
     void setupBorder();
+    void rotate10();
 protected:
 
     // override fundamental drawing functions
@@ -93,6 +94,8 @@ private:
 
     long boxSize;
     long borderSize;
+
+    int rotationOnX;
 
     // helper function for loading shaders
     GLuint loadShader(GLenum type, const char *source);

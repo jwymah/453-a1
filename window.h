@@ -16,6 +16,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QActionGroup>
+#include <QTimer>
+#include "game.h"
 
 class Renderer;
 
@@ -33,7 +35,7 @@ public:
 
 
 private slots:
-
+    void timer_tick();
 
 private:
     // Main widget for drawing
@@ -43,8 +45,13 @@ private:
     QMenu * mFileMenu;
     QAction * mQuitAction;
 
+    // Timer
+    QTimer *m_pGameTimer;
+
     // helper function for creating actions
     void createActions();
+
+    Game *game;
 
 };
 
