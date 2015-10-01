@@ -34,9 +34,13 @@ Window::Window(QWidget *parent) :
     // Timer stuff - tutorial 5
     this->m_pGameTimer = new QTimer(this);
     connect(this->m_pGameTimer, SIGNAL(timeout()), this, SLOT(timer_tick()));
-    this->m_pGameTimer->start(500); // 500 ms
+    this->m_pGameTimer->start(300); // 500 ms
 
-    game = new Game(10, 24);
+    gameHeight = 24;
+    gameWidth = 10;
+
+    game = new Game(gameWidth, gameHeight);
+
 }
 
 // helper function for creating actions
@@ -55,21 +59,21 @@ void Window::timer_tick()
     cout << "Tick" << endl;
     // Here's where you'd increment the game state
     // then draw a new frame
-//    renderer->paintGL();
-    renderer->rotate10();
+
+//    renderer->rotate10();
     game->tick();
 
-    int board[10*24];
+    int board[gameHeight][10];
 
-    for (int r=24; r>0; r--)
+    for (int r=0; r<gameHeight; r++)
     {
-        for (int c=10; c>0; c--)
+        for (int c=0; c<gameWidth; c++)
         {
-            cout << game->get(r,c) << " ";
+            board[r][c] = game->get(r,c);
         }
-        cout << endl;
     }
-
+    renderer->setupGameBoard(board);
+    renderer->update();
 }
 
 // destructor

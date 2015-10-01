@@ -104,6 +104,8 @@ void Renderer::initializeGL()
     m_programID = m_program->programId();
 
     rotationOnX = 0;
+    rotationOnZ = 0;
+    rotationOnY = 0;
 
     // Setup the triangles
     setupBorderTriangles();
@@ -116,6 +118,22 @@ void Renderer::initializeGL()
     glClear(GL_DEPTH_BUFFER_BIT);
 
     setupUBorder();
+
+    gameHeight = 24;
+    gameWidth = 10;
+
+    for (int i=0; i<gameHeight; i++)
+    {
+        for (int j=0; j<gameWidth; j++)
+        {
+            gameBoard[i][j] = -1;
+        }
+    }
+
+    mouse_x = 0;
+    mouse_left = false;
+    mouse_middle = false;
+    mouse_right = false;
 }
 
 // called by the Qt GUI system, to allow OpenGL drawing commands
@@ -135,7 +153,9 @@ void Renderer::paintGL()
 
     QMatrix4x4 view_matrix;
     view_matrix.translate(0.0f, 0.0f, -40.0f);
-    view_matrix.rotate(rotationOnX, 1.0, 0.0, 0.0);
+//    view_matrix.rotate(rotationOnX, 1.0, 0.0, 0.0);
+//    view_matrix.rotate(rotationOnZ, 0.0, 1.0, 0.0);
+//    view_matrix.rotate(rotationOnY, 0.0, 0.0, 1.0);
 
     glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
 
@@ -151,6 +171,9 @@ void Renderer::paintGL()
     // it appear centered in the window.
 
     model_matrix.translate(-5.0f, -12.0f, 0.0f);
+    model_matrix.rotate(rotationOnX, 1.0, 0.0, 0.0);
+    model_matrix.rotate(rotationOnZ, 0.0, 1.0, 0.0);
+    model_matrix.rotate(rotationOnY, 0.0, 0.0, 1.0);
     glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
     // Not implemented: actually draw the current game state.
@@ -160,11 +183,12 @@ void Renderer::paintGL()
     drawBorderTriangles();
 
     drawUBorder();
+    drawGameBoard();
 
 //    drawBox();
 
     // deactivate the program
-//    m_program->release();
+    m_program->release();
 }
 
 // called by the Qt GUI system, to allow OpenGL to respond to widget resizing
@@ -179,8 +203,7 @@ void Renderer::resizeGL(int w, int h)
     // Set up perspective projection, using current size and aspect
     // ratio of display
     QMatrix4x4 projection_matrix;
-    projection_matrix.perspective(40.0f, (GLfloat)width() / (GLfloat)height(),
-                                  0.1f, 1000.0f);
+    projection_matrix.perspective(40.0f, (GLfloat)width() / (GLfloat)height(), 0.1f, 1000.0f);
     glUniformMatrix4fv(m_PMatrixUniform, 1, false, projection_matrix.data());
 
     glViewport(0, 0, width(), height());
@@ -279,14 +302,18 @@ void Renderer::mousePressEvent(QMouseEvent * event)
 {
     QTextStream cout(stdout);
     cout << "Stub: Button " << event->button() << " pressed.\n";
-    QMatrix4x4 view_matrix;
-    view_matrix.translate(0.0f, 0.0f, -40.0f);
-    view_matrix.rotate(30, 1.0, 1.0, 0.0);
-
-    glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
-
-    paintGL();
-
+    if (event->button() == 1)
+    {
+        mouse_left = true;
+    }
+    else if (event->button() == 4)
+    {
+        mouse_middle = true;
+    }
+    else if (event->button() == 2)
+    {
+        mouse_right = true;
+    }
 }
 
 // override mouse release event
@@ -294,13 +321,49 @@ void Renderer::mouseReleaseEvent(QMouseEvent * event)
 {
     QTextStream cout(stdout);
     cout << "Stub: Button " << event->button() << " pressed.\n";
+    if (event->button() == 1)
+    {
+        mouse_left = false;
+    }
+    else if (event->button() == 4)
+    {
+        mouse_middle = false;
+    }
+    else if (event->button() == 2)
+    {
+        mouse_right = false;
+    }
 }
 
 // override mouse move event
 void Renderer::mouseMoveEvent(QMouseEvent * event)
 {
+    if (mouse_x == 0)
+    {
+        mouse_x++;
+        return;
+    }
+
     QTextStream cout(stdout);
     cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
+
+    if (mouse_left)
+    {
+        rotationOnX -= (mouse_x - event->x());
+        mouse_x = event->x();
+    }
+    if (mouse_middle)
+    {
+        rotationOnZ -= (mouse_x - event->x());
+        mouse_x = event->x();
+    }
+    if (mouse_right)
+    {
+        rotationOnY -= (mouse_x - event->x());
+        mouse_x = event->x();
+    }
+
+    update();
 }
 
 void Renderer::setupBox()
@@ -390,26 +453,26 @@ void Renderer::setupUBorder()
         glGenBuffers(1, &this->m_borderUVaos[k+22]);
         glBindBuffer(GL_ARRAY_BUFFER, this->m_borderUVaos[k+22]);
 
-            // Allocate buffer
-            glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL, GL_STATIC_DRAW);
+        // Allocate buffer
+        glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL, GL_STATIC_DRAW);
 
-            // translation matrix
-            glm::mat4 trans = glm::translate(glm::mat4(), glm::vec3((float) k, -1.0f, 0.0f));
+        // translation matrix
+        glm::mat4 trans = glm::translate(glm::mat4(), glm::vec3((float) k, -1.0f, 0.0f));
 
-            for (int i=0; i<108; i+=3)
-            {
-                glm::vec4 result = trans * glm::vec4(unitCube[i], unitCube[i+1], unitCube[i+2], 1.0f);
-                translatedCube[i] = result.x;
-                translatedCube[i+1] = result.y;
-                translatedCube[i+2] = result.z;
-            }
+        for (int i=0; i<108; i+=3)
+        {
+            glm::vec4 result = trans * glm::vec4(unitCube[i], unitCube[i+1], unitCube[i+2], 1.0f);
+            translatedCube[i] = result.x;
+            translatedCube[i+1] = result.y;
+            translatedCube[i+2] = result.z;
+        }
 
-            // Upload the data to the GPU
-            glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &translatedCube[0]);
-            glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &cubeColors[0]);
-            glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
+        // Upload the data to the GPU
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &translatedCube[0]);
+        glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &cubeColors[0]);
+        glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
 
-            bindit();
+        bindit();
     }
     for (int k=0; k<22; k++)
     {
@@ -470,6 +533,86 @@ void Renderer::drawUBorder()
     }
 }
 
+void Renderer::setupGameBoard(int gameBoard[][10])
+{
+    long cBufferSize = sizeof(cubeColors) * sizeof(float),
+        vBufferSize = sizeof(unitCube) * sizeof(float),
+        nBufferSize = sizeof(cubeNorms) * sizeof(float);
+
+    float translatedCube[108];
+
+    for (int r=0; r<gameHeight; r++)
+    {
+        for (int c=0; c<gameWidth; c++)
+        {
+            if (gameBoard[r][c] != -1)
+            {
+                glGenBuffers(1, &this->m_gameBlocksVaos[r][c]);
+                glBindBuffer(GL_ARRAY_BUFFER, this->m_gameBlocksVaos[r][c]);
+
+                // Allocate buffer
+                glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL, GL_STATIC_DRAW);
+
+                // translation matrix
+                glm::mat4 trans = glm::translate(glm::mat4(), glm::vec3((float) c, (float) r, 0.0f));
+
+                for (int i=0; i<108; i+=3)
+                {
+                    glm::vec4 result = trans * glm::vec4(unitCube[i], unitCube[i+1], unitCube[i+2], 1.0f);
+                    translatedCube[i] = result.x;
+                    translatedCube[i+1] = result.y;
+                    translatedCube[i+2] = result.z;
+                }
+
+                // Upload the data to the GPU
+                glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &translatedCube[0]);
+                glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &cubeColors[0]);
+                glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
+
+                bindit();
+            }
+            this->gameBoard[r][c] = gameBoard[r][c];
+        }
+    }
+}
+
+void Renderer::drawGameBoard()
+{
+    long cBufferSize = sizeof(cubeColors) * sizeof(float),
+        vBufferSize = sizeof(unitCube) * sizeof(float),
+        nBufferSize = sizeof(cubeNorms) * sizeof(float);
+    boxSize = vBufferSize + cBufferSize + nBufferSize;
+
+    for (int r=0; r<gameHeight; r++)
+    {
+        for (int c=0; c<gameWidth; c++)
+        {
+            if (this->gameBoard[r][c] != -1)
+            {
+                // Bind to the correct context
+                glBindBuffer(GL_ARRAY_BUFFER, this->m_gameBlocksVaos[r][c]);
+
+                // Enable the attribute arrays
+                glEnableVertexAttribArray(this->m_posAttr);
+                glEnableVertexAttribArray(this->m_colAttr);
+                glEnableVertexAttribArray(this->m_norAttr);
+
+                // Specifiy where these are in the VBO
+                glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(0));
+                glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
+                glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
+
+                // Draw the triangles
+                glDrawArrays(GL_TRIANGLES, 0, 36); // 36 vertices
+
+                glDisableVertexAttribArray(this->m_posAttr);
+                glDisableVertexAttribArray(this->m_colAttr);
+                glDisableVertexAttribArray(this->m_norAttr);
+            }
+        }
+    }
+}
+
 void Renderer::bindit()
 {
     long cBufferSize = sizeof(cubeColors) * sizeof(float),
@@ -493,5 +636,5 @@ void Renderer::bindit()
 void Renderer::rotate10()
 {
     rotationOnX = (rotationOnX + 10) % 360;
-    paintGL();
+    update();
 }

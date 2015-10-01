@@ -51,6 +51,9 @@ private:
     // helper function for creating actions
     void createActions();
 
+    int gameHeight;
+    int gameWidth;
+
     Game *game;
 
 };

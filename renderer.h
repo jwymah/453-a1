@@ -36,6 +36,11 @@ public:
 
     void drawBorder();
     void setupBorder();
+
+    int gameBoard[24][10];
+    void setupGameBoard(int gameBoard[][10]);
+    void drawGameBoard();
+
     void rotate10();
 protected:
 
@@ -63,6 +68,12 @@ protected:
 
 private:
 
+    // member variables for rotations
+    int mouse_x;
+    bool mouse_left;
+    bool mouse_middle;
+    bool mouse_right;
+
     // member variables for shader manipulation
     GLuint m_programID;
     GLuint m_MMatrixUniform; // model matrix
@@ -81,6 +92,11 @@ private:
 
     GLuint m_borderUVaos[54];
 
+    GLuint m_gameBlocksVaos[24][10];
+
+    int gameHeight;
+    int gameWidth;
+
     QOpenGLShaderProgram *m_program;
 
     // for storing triangle vertices and colours
@@ -96,6 +112,8 @@ private:
     long borderSize;
 
     int rotationOnX;
+    int rotationOnZ;
+    int rotationOnY;
 
     // helper function for loading shaders
     GLuint loadShader(GLenum type, const char *source);
@@ -111,6 +129,8 @@ private:
 
     void setupUBorder();
     void drawUBorder();
+
+    void setupBoxAt(int row, int column);
 
     void bindit();
 
