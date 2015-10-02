@@ -16,6 +16,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLShader>
 #include <QMouseEvent>
+#include <QKeySequence>
 #include <glm/glm.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -41,7 +42,15 @@ public:
     void setupGameBoard(int gameBoard[][10]);
     void drawGameBoard();
 
-    void rotate10();
+    // Stuff called by window.
+    void setShiftStatus(bool status);
+    void setDisplayWireFrame();
+    void setDisplayFace();
+    void setDisplayMultiColored();
+
+
+    // stuff for bindings
+    void resetView();
 protected:
 
     // override fundamental drawing functions
@@ -70,9 +79,12 @@ private:
 
     // member variables for rotations
     int mouse_x;
+    int display_mode;
+    float scale_factor;
     bool mouse_left;
     bool mouse_middle;
     bool mouse_right;
+    bool shift_pressed;
 
     // member variables for shader manipulation
     GLuint m_programID;
@@ -129,10 +141,8 @@ private:
 
     void setupUBorder();
     void drawUBorder();
-
-    void setupBoxAt(int row, int column);
-
     void bindit();
+
 
 };
 

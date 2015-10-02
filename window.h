@@ -30,12 +30,22 @@ public:
     // constructor
     Window(QWidget *parent = 0);
 
+    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void keyReleaseEvent(QKeyEvent *event);
+
     // destructor
     ~Window();
 
-
 private slots:
+    void draw_tick();
     void timer_tick();
+    void newGame();
+    void resetView();
+
+    void pause();
+    void speedUp();
+    void speedDown();
+    void speedAuto();
 
 private:
     // Main widget for drawing
@@ -43,16 +53,32 @@ private:
 
     // Menu items and actions
     QMenu * mFileMenu;
+    QAction * mNewGameAction;
+    QAction * mResetAction;
     QAction * mQuitAction;
+
+    QMenu * mDrawMenu;
+
+    QMenu * mGameMenu;
+    QAction * mPauseAction;
+    QAction * mSpeedUpAction;
+    QAction * mSpeedDownAction;
+    QAction * mSpeedAutoAction;
+
 
     // Timer
     QTimer *m_pGameTimer;
+    QTimer *m_pDrawTimer;
 
     // helper function for creating actions
-    void createActions();
+    void createFileActions();
+    void createDrawActions();
+    void createGameActions();
 
     int gameHeight;
     int gameWidth;
+
+    float gameSpeed;
 
     Game *game;
 

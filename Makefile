@@ -496,7 +496,8 @@ compiler_moc_header_clean:
 moc_renderer.cpp: renderer.h
 	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/ugc/jwymah/453/a1 -I/home/ugc/jwymah/453/a1 -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include renderer.h -o moc_renderer.cpp
 
-moc_window.cpp: window.h
+moc_window.cpp: game.h \
+		window.h
 	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/ugc/jwymah/453/a1 -I/home/ugc/jwymah/453/a1 -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include window.h -o moc_window.cpp
 
 compiler_moc_source_make_all:
@@ -516,13 +517,15 @@ compiler_clean: compiler_moc_header_clean
 game.o: game.cpp game.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o game.o game.cpp
 
-main.o: main.cpp window.h
+main.o: main.cpp window.h \
+		game.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 renderer.o: renderer.cpp renderer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o renderer.o renderer.cpp
 
 window.o: window.cpp window.h \
+		game.h \
 		renderer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o window.o window.cpp
 

@@ -110,9 +110,6 @@ void Renderer::initializeGL()
     // Setup the triangles
     setupBorderTriangles();
 
-    // Wireframe
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     // for overlapping stuff
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -131,9 +128,13 @@ void Renderer::initializeGL()
     }
 
     mouse_x = 0;
+    setDisplayWireFrame();
+    setDisplayFace();
+    scale_factor = 1.0f;
     mouse_left = false;
     mouse_middle = false;
     mouse_right = false;
+    shift_pressed = false;
 }
 
 // called by the Qt GUI system, to allow OpenGL drawing commands
@@ -153,9 +154,6 @@ void Renderer::paintGL()
 
     QMatrix4x4 view_matrix;
     view_matrix.translate(0.0f, 0.0f, -40.0f);
-//    view_matrix.rotate(rotationOnX, 1.0, 0.0, 0.0);
-//    view_matrix.rotate(rotationOnZ, 0.0, 1.0, 0.0);
-//    view_matrix.rotate(rotationOnY, 0.0, 0.0, 1.0);
 
     glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
 
@@ -170,10 +168,11 @@ void Renderer::paintGL()
     // the game so that we can draw it starting at (0,0) but have
     // it appear centered in the window.
 
-    model_matrix.translate(-5.0f, -12.0f, 0.0f);
     model_matrix.rotate(rotationOnX, 1.0, 0.0, 0.0);
     model_matrix.rotate(rotationOnZ, 0.0, 1.0, 0.0);
     model_matrix.rotate(rotationOnY, 0.0, 0.0, 1.0);
+    model_matrix.scale(scale_factor);
+    model_matrix.translate(-5.0f, -12.0f, 0.0f);
     glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
     // Not implemented: actually draw the current game state.
@@ -181,11 +180,8 @@ void Renderer::paintGL()
     // corners of the game board.
 
     drawBorderTriangles();
-
     drawUBorder();
     drawGameBoard();
-
-//    drawBox();
 
     // deactivate the program
     m_program->release();
@@ -314,6 +310,7 @@ void Renderer::mousePressEvent(QMouseEvent * event)
     {
         mouse_right = true;
     }
+    mouse_x = 0;
 }
 
 // override mouse release event
@@ -340,7 +337,18 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
 {
     if (mouse_x == 0)
     {
-        mouse_x++;
+        mouse_x = event->x();
+        return;
+    }
+
+    if (shift_pressed)
+    {
+        scale_factor -= ((float) mouse_x - event->x()) / 200;
+        mouse_x = event->x();
+        if (scale_factor < 0)
+        {
+            scale_factor = 0.0;
+        }
         return;
     }
 
@@ -362,8 +370,10 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
         rotationOnY -= (mouse_x - event->x());
         mouse_x = event->x();
     }
-
-    update();
+}
+void Renderer::setShiftStatus(bool status)
+{
+    shift_pressed = status;
 }
 
 void Renderer::setupBox()
@@ -633,8 +643,28 @@ void Renderer::bindit()
     glDisableVertexAttribArray(this->m_norAttr);
 }
 
-void Renderer::rotate10()
+void Renderer::resetView()
 {
-    rotationOnX = (rotationOnX + 10) % 360;
-    update();
+    scale_factor = 1.0f;
+    rotationOnX = 0;
+    rotationOnZ = 0;
+    rotationOnY = 0;
+}
+
+void Renderer::setDisplayWireFrame()
+{
+    display_mode = 0;
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
+void Renderer::setDisplayFace()
+{
+    display_mode = 1;
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void Renderer::setDisplayMultiColored()
+{
+    display_mode = 2;
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
