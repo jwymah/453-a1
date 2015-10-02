@@ -29,6 +29,11 @@ Window::Window(QWidget *parent) :
     mDrawMenu->addAction(mWireframeAction);
     mDrawMenu->addAction(mFillAction);
     mDrawMenu->addAction(mMultiColourAction);
+    drawGroup = new QActionGroup(this);
+    drawGroup->setExclusive(true);
+    drawGroup->addAction(mWireframeAction);
+    drawGroup->addAction(mFillAction);
+    drawGroup->addAction(mMultiColourAction);
 
     // Setup the Game menu
     mGameMenu = menuBar()->addMenu(tr("&Game"));
@@ -36,6 +41,9 @@ Window::Window(QWidget *parent) :
     mGameMenu->addAction(mSpeedUpAction);
     mGameMenu->addAction(mSpeedDownAction);
     mGameMenu->addAction(mSpeedAutoAction);
+
+    scoreBoard = new QWindow();
+    scoreBoard->setTitle("SCORE");
 
     // Setup the application's widget collection
     QVBoxLayout * layout = new QVBoxLayout();
@@ -52,6 +60,7 @@ Window::Window(QWidget *parent) :
     this->m_pGameTimer = new QTimer(this);
     connect(this->m_pGameTimer, SIGNAL(timeout()), this, SLOT(timer_tick()));
     gameSpeed = 300;
+    gameSpeedAuto = false;
     this->m_pGameTimer->start(gameSpeed);// ms
 
     // drawing timer
@@ -91,14 +100,18 @@ void Window::createDrawActions()
     // WireFrame
     mWireframeAction = new QAction(tr("&Wire Frame"), this);
     mWireframeAction->setShortcut(QKeySequence(Qt::Key_W));
+    mWireframeAction->setCheckable(true);
     connect(mWireframeAction, SIGNAL(triggered()), this, SLOT(wireframe()));
     // WireFrame
     mFillAction = new QAction(tr("&Face"), this);
     mFillAction->setShortcut(QKeySequence(Qt::Key_F));
+    mFillAction->setCheckable(true);
+    mFillAction->setChecked(true);
     connect(mFillAction, SIGNAL(triggered()), this, SLOT(face()));
     // WireFrame
     mMultiColourAction = new QAction(tr("&Multicoloured"), this);
     mMultiColourAction->setShortcut(QKeySequence(Qt::Key_M));
+    mMultiColourAction->setCheckable(true);
     connect(mMultiColourAction, SIGNAL(triggered()), this, SLOT(multicoloured()));
 }
 
@@ -108,6 +121,7 @@ void Window::createGameActions()
     // Pause
     mPauseAction = new QAction(tr("&Pause"), this);
     mPauseAction->setShortcut(QKeySequence(Qt::Key_P));
+    mPauseAction->setCheckable(true);
     connect(mPauseAction, SIGNAL(triggered()), this, SLOT(pause()));
 
     // Speed up
@@ -123,6 +137,7 @@ void Window::createGameActions()
     // Auto increase
     mSpeedAutoAction = new QAction(tr("&Auto-Increase"), this);
     mSpeedAutoAction->setShortcut(QKeySequence(Qt::Key_A));
+    mSpeedAutoAction->setCheckable(true);
     connect(mSpeedAutoAction, SIGNAL(triggered()), this, SLOT(speedAuto()));
 }
 
@@ -141,26 +156,34 @@ void Window::multicoloured()
 
 void Window::pause()
 {
-    gameSpeed = 30000;
-    m_pGameTimer->start(gameSpeed);
+    if (m_pGameTimer->isActive())
+    {
+        m_pGameTimer->stop();
+        mPauseAction->setChecked(true);
+    }
+    else
+    {
+        m_pGameTimer->start(gameSpeed);
+        mPauseAction->setChecked(false);
+    }
 }
 
 void Window::speedUp()
 {
-    gameSpeed /= 1.5;
+    gameSpeed -= 5;
     m_pGameTimer->start(gameSpeed);
 }
 
 void Window::speedDown()
 {
-    gameSpeed *= 1.5;
+    gameSpeed += 5;
     m_pGameTimer->start(gameSpeed);
 }
 
 void Window::speedAuto()
 {
-    gameSpeed = 0;
-    m_pGameTimer->start(gameSpeed);
+    gameSpeedAuto = !gameSpeedAuto;
+    mSpeedAutoAction->setChecked(gameSpeedAuto);
 }
 
 void Window::newGame()
@@ -181,6 +204,15 @@ void Window::draw_tick()
 void Window::timer_tick()
 {
     cout << "Tick" << endl;
+    if (gameSpeedAuto)
+    {
+        gameSpeed--;
+        if (gameSpeed < 50)
+        {
+            gameSpeed = 50;
+        }
+        m_pGameTimer->setInterval(gameSpeed);
+    }
 
     game->tick();
 

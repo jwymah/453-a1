@@ -17,7 +17,7 @@
 #include <QVBoxLayout>
 #include <QActionGroup>
 #include <QTimer>
-#include <QRadioButton>
+#include <QWindow>
 #include "game.h"
 
 class Renderer;
@@ -62,6 +62,8 @@ private:
     QAction * mResetAction;
     QAction * mQuitAction;
 
+    QActionGroup * drawGroup;
+
     QMenu * mDrawMenu;
     QAction * mWireframeAction;
     QAction * mFillAction;
@@ -72,6 +74,8 @@ private:
     QAction * mSpeedUpAction;
     QAction * mSpeedDownAction;
     QAction * mSpeedAutoAction;
+
+    QWindow * scoreBoard;
 
     // Timer
     QTimer *m_pGameTimer;
@@ -86,6 +90,7 @@ private:
     int gameWidth;
 
     float gameSpeed;
+    bool gameSpeedAuto;
 
     Game *game;
 

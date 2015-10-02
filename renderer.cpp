@@ -348,8 +348,6 @@ void Renderer::drawBorderTriangles()
 // override mouse press event
 void Renderer::mousePressEvent(QMouseEvent * event)
 {
-    QTextStream cout(stdout);
-    cout << "Stub: Button " << event->button() << " pressed.\n";
     if (event->button() == 1)
     {
         mouse_left = true;
@@ -413,9 +411,6 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
         }
         return;
     }
-
-    QTextStream cout(stdout);
-    cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
 
     if (mouse_left)
     {
