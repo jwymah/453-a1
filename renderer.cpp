@@ -27,13 +27,13 @@ const float unitCube[] = {
     0.,0.,0.,  0.,0.,1.,  0.,1.,0.,
     0.,0.,1.,  0.,1.,1.,  0.,1.,0.,
 
-    // right
-    1.,0.,0.,  1.,0.,1.,  1.,1.,0.,
-    1.,0.,1.,  1.,1.,1.,  1.,1.,0.,
-
     // top
     1.,1.,0.,  1.,1.,1.,  0.,1.,0.,
     1.,1.,1.,  0.,1.,1.,  0.,1.,0.,
+
+    // right
+    1.,0.,0.,  1.,0.,1.,  1.,1.,0.,
+    1.,0.,1.,  1.,1.,1.,  1.,1.,0.,
 
     // front
     0.,0.,1.,  1.,0.,1.,  0.,1.,1.,
@@ -115,6 +115,13 @@ const float moreCubeColors[][3*3*12] = {
     {},
 };
 
+float randomColorCube[108] = {};
+float colorFaceTwoTriangles[288];
+float red;
+float green;
+float blue;
+
+
 // constructor
 Renderer::~Renderer()
 {
@@ -166,7 +173,8 @@ void Renderer::initializeGL()
             gameBoard[i][j] = -1;
         }
     }
-
+    generatorOfSeven = 0;
+    generateRandomCubeColor();
     mouse_x = 0;
     setDisplayFace();
     scale_factor = 1.0f;
@@ -637,13 +645,24 @@ void Renderer::setupGameBoard(int gameBoard[][10])
 
                 // Upload the data to the GPU
                 glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &translatedCube[0]);
-                if (display_mode > 1)
-                {
-                    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &moreCubeColors[gameBoard[r][(rand())%gameWidth]]);
-                }
-                else
+                if (display_mode == 0) // wireframe display
+                {}
+                else if (display_mode == 1) // face display
                 {
                     glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &moreCubeColors[gameBoard[r][c]]);
+                }
+                else if (display_mode == 2)  // multi-face display
+                {
+                    for (int p=0; p<12; p++)
+                    {
+                        generatorOfSeven = rand()%7;
+                        glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + p*144, 144, &moreCubeColors[generatorOfSeven]);
+                    }
+//                    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &randomColorCube[gameBoard[r][c]]);
+                }
+                else    // random ass display
+                {
+                    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &randomColorCube[gameBoard[r][(rand())%gameWidth]]);
                 }
                 glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
 
@@ -734,6 +753,7 @@ void Renderer::setDisplayFace()
 
 void Renderer::setDisplayMultiColored()
 {
+    generateRandomCubeColor();
     display_mode = 2;
 }
 
@@ -750,5 +770,18 @@ void Renderer::persistanceRotate()
     if (!mouse_right)
     {
         rotationOnY -= persistanceY;
+    }
+}
+
+void Renderer::generateRandomCubeColor()
+{
+    for (int j=0; j<108; j+=6)
+    {
+        randomColorCube[j] =  ((double) rand() / (RAND_MAX));
+        randomColorCube[j+3] =  ((double) rand() / (RAND_MAX));
+        randomColorCube[j+1] =  ((double) rand() / (RAND_MAX));
+        randomColorCube[j+4] =  ((double) rand() / (RAND_MAX));
+        randomColorCube[j+2] =  ((double) rand() / (RAND_MAX));
+        randomColorCube[j+5] =  ((double) rand() / (RAND_MAX));
     }
 }

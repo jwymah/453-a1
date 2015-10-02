@@ -133,12 +133,16 @@ private:
     long persTimeX;
     long persTimeZ;
     long persTimeY;
+    int generatorOfSeven;
 
     // helper function for loading shaders
     GLuint loadShader(GLenum type, const char *source);
 
     // helper function for drawing bordering triangles
     void generateBorderTriangles();
+
+    void generateEvenMoreColors();
+    void generateRandomCubeColor();
 
     void setupBorderTriangles();
     void drawBorderTriangles();
