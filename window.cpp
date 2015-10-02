@@ -26,6 +26,9 @@ Window::Window(QWidget *parent) :
 
     // Setup the Draw menu
     mDrawMenu = menuBar()->addMenu(tr("&Draw"));
+    mDrawMenu->addAction(mWireframeAction);
+    mDrawMenu->addAction(mFillAction);
+    mDrawMenu->addAction(mMultiColourAction);
 
     // Setup the Game menu
     mGameMenu = menuBar()->addMenu(tr("&Game"));
@@ -85,7 +88,18 @@ void Window::createFileActions()
 
 void Window::createDrawActions()
 {
-
+    // WireFrame
+    mWireframeAction = new QAction(tr("&Wire Frame"), this);
+    mWireframeAction->setShortcut(QKeySequence(Qt::Key_W));
+    connect(mWireframeAction, SIGNAL(triggered()), this, SLOT(wireframe()));
+    // WireFrame
+    mFillAction = new QAction(tr("&Face"), this);
+    mFillAction->setShortcut(QKeySequence(Qt::Key_F));
+    connect(mFillAction, SIGNAL(triggered()), this, SLOT(face()));
+    // WireFrame
+    mMultiColourAction = new QAction(tr("&Multicoloured"), this);
+    mMultiColourAction->setShortcut(QKeySequence(Qt::Key_M));
+    connect(mMultiColourAction, SIGNAL(triggered()), this, SLOT(multicoloured()));
 }
 
 // helper function for creating actions
@@ -112,9 +126,22 @@ void Window::createGameActions()
     connect(mSpeedAutoAction, SIGNAL(triggered()), this, SLOT(speedAuto()));
 }
 
+void Window::wireframe()
+{
+    renderer->setDisplayWireFrame();
+}
+void Window::face()
+{
+    renderer->setDisplayFace();
+}
+void Window::multicoloured()
+{
+    renderer->setDisplayMultiColored();
+}
+
 void Window::pause()
 {
-    gameSpeed = 180000;
+    gameSpeed = 30000;
     m_pGameTimer->start(gameSpeed);
 }
 
@@ -190,18 +217,7 @@ void Window::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Shift :
         renderer->setShiftStatus(true);
         break;
-    case Qt::Key_W :
-        cout <<" what the fuck" << endl;
-        renderer->setDisplayWireFrame();
-        break;
-    case Qt::Key_F :
-        renderer->setDisplayFace();
-        break;
-    case Qt::Key_M :
-        renderer->setDisplayMultiColored();
-        break;
     }
-    update();
 }
 
 void Window::keyReleaseEvent(QKeyEvent *event)

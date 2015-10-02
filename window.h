@@ -42,6 +42,10 @@ private slots:
     void newGame();
     void resetView();
 
+    void wireframe();
+    void face();
+    void multicoloured();
+
     void pause();
     void speedUp();
     void speedDown();
@@ -58,13 +62,15 @@ private:
     QAction * mQuitAction;
 
     QMenu * mDrawMenu;
+    QAction * mWireframeAction;
+    QAction * mFillAction;
+    QAction * mMultiColourAction;
 
     QMenu * mGameMenu;
     QAction * mPauseAction;
     QAction * mSpeedUpAction;
     QAction * mSpeedDownAction;
     QAction * mSpeedAutoAction;
-
 
     // Timer
     QTimer *m_pGameTimer;

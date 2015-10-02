@@ -48,6 +48,7 @@ public:
     void setDisplayFace();
     void setDisplayMultiColored();
 
+    void persistanceRotate();
 
     // stuff for bindings
     void resetView();
@@ -126,6 +127,12 @@ private:
     int rotationOnX;
     int rotationOnZ;
     int rotationOnY;
+    int persistanceX;
+    int persistanceZ;
+    int persistanceY;
+    long persTimeX;
+    long persTimeZ;
+    long persTimeY;
 
     // helper function for loading shaders
     GLuint loadShader(GLenum type, const char *source);

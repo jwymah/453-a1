@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Window_t {
-    QByteArrayData data[10];
-    char stringdata0[81];
+    QByteArrayData data[13];
+    char stringdata0[110];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -35,15 +35,18 @@ QT_MOC_LITERAL(2, 17, 0), // ""
 QT_MOC_LITERAL(3, 18, 10), // "timer_tick"
 QT_MOC_LITERAL(4, 29, 7), // "newGame"
 QT_MOC_LITERAL(5, 37, 9), // "resetView"
-QT_MOC_LITERAL(6, 47, 5), // "pause"
-QT_MOC_LITERAL(7, 53, 7), // "speedUp"
-QT_MOC_LITERAL(8, 61, 9), // "speedDown"
-QT_MOC_LITERAL(9, 71, 9) // "speedAuto"
+QT_MOC_LITERAL(6, 47, 9), // "wireframe"
+QT_MOC_LITERAL(7, 57, 4), // "face"
+QT_MOC_LITERAL(8, 62, 13), // "multicoloured"
+QT_MOC_LITERAL(9, 76, 5), // "pause"
+QT_MOC_LITERAL(10, 82, 7), // "speedUp"
+QT_MOC_LITERAL(11, 90, 9), // "speedDown"
+QT_MOC_LITERAL(12, 100, 9) // "speedAuto"
 
     },
     "Window\0draw_tick\0\0timer_tick\0newGame\0"
-    "resetView\0pause\0speedUp\0speedDown\0"
-    "speedAuto"
+    "resetView\0wireframe\0face\0multicoloured\0"
+    "pause\0speedUp\0speedDown\0speedAuto"
 };
 #undef QT_MOC_LITERAL
 
@@ -53,7 +56,7 @@ static const uint qt_meta_data_Window[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       8,   14, // methods
+      11,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -61,16 +64,22 @@ static const uint qt_meta_data_Window[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   54,    2, 0x08 /* Private */,
-       3,    0,   55,    2, 0x08 /* Private */,
-       4,    0,   56,    2, 0x08 /* Private */,
-       5,    0,   57,    2, 0x08 /* Private */,
-       6,    0,   58,    2, 0x08 /* Private */,
-       7,    0,   59,    2, 0x08 /* Private */,
-       8,    0,   60,    2, 0x08 /* Private */,
-       9,    0,   61,    2, 0x08 /* Private */,
+       1,    0,   69,    2, 0x08 /* Private */,
+       3,    0,   70,    2, 0x08 /* Private */,
+       4,    0,   71,    2, 0x08 /* Private */,
+       5,    0,   72,    2, 0x08 /* Private */,
+       6,    0,   73,    2, 0x08 /* Private */,
+       7,    0,   74,    2, 0x08 /* Private */,
+       8,    0,   75,    2, 0x08 /* Private */,
+       9,    0,   76,    2, 0x08 /* Private */,
+      10,    0,   77,    2, 0x08 /* Private */,
+      11,    0,   78,    2, 0x08 /* Private */,
+      12,    0,   79,    2, 0x08 /* Private */,
 
  // slots: parameters
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -93,10 +102,13 @@ void Window::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         case 1: _t->timer_tick(); break;
         case 2: _t->newGame(); break;
         case 3: _t->resetView(); break;
-        case 4: _t->pause(); break;
-        case 5: _t->speedUp(); break;
-        case 6: _t->speedDown(); break;
-        case 7: _t->speedAuto(); break;
+        case 4: _t->wireframe(); break;
+        case 5: _t->face(); break;
+        case 6: _t->multicoloured(); break;
+        case 7: _t->pause(); break;
+        case 8: _t->speedUp(); break;
+        case 9: _t->speedDown(); break;
+        case 10: _t->speedAuto(); break;
         default: ;
         }
     }
@@ -128,13 +140,13 @@ int Window::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 8)
+        if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 8;
+        _id -= 11;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 8)
+        if (_id < 11)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 8;
+        _id -= 11;
     }
     return _id;
 }

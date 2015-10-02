@@ -128,7 +128,6 @@ void Renderer::initializeGL()
     }
 
     mouse_x = 0;
-    setDisplayWireFrame();
     setDisplayFace();
     scale_factor = 1.0f;
     mouse_left = false;
@@ -157,6 +156,19 @@ void Renderer::paintGL()
 
     glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
 
+    if (display_mode == 0)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else if(display_mode == 1)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
     // Not implemented: set up lighting (if necessary)
 
     // Not implemented: scale and rotate the scene
@@ -167,7 +179,7 @@ void Renderer::paintGL()
     // 10 and height 24 (game = 20, stripe = 4).  Let's translate
     // the game so that we can draw it starting at (0,0) but have
     // it appear centered in the window.
-
+    persistanceRotate();
     model_matrix.rotate(rotationOnX, 1.0, 0.0, 0.0);
     model_matrix.rotate(rotationOnZ, 0.0, 1.0, 0.0);
     model_matrix.rotate(rotationOnY, 0.0, 0.0, 1.0);
@@ -302,11 +314,11 @@ void Renderer::mousePressEvent(QMouseEvent * event)
     {
         mouse_left = true;
     }
-    else if (event->button() == 4)
+    if (event->button() == 4)
     {
         mouse_middle = true;
     }
-    else if (event->button() == 2)
+    if (event->button() == 2)
     {
         mouse_right = true;
     }
@@ -316,18 +328,28 @@ void Renderer::mousePressEvent(QMouseEvent * event)
 // override mouse release event
 void Renderer::mouseReleaseEvent(QMouseEvent * event)
 {
-    QTextStream cout(stdout);
-    cout << "Stub: Button " << event->button() << " pressed.\n";
     if (event->button() == 1)
     {
+        if ((event->timestamp() - persTimeX) > 50)
+        {
+            persistanceX = 0;
+        }
         mouse_left = false;
     }
     else if (event->button() == 4)
     {
+        if ((event->timestamp() - persTimeZ) > 50)
+        {
+            persistanceZ = 0;
+        }
         mouse_middle = false;
     }
     else if (event->button() == 2)
     {
+        if ((event->timestamp() - persTimeY) > 50)
+        {
+            persistanceY = 0;
+        }
         mouse_right = false;
     }
 }
@@ -357,19 +379,23 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
 
     if (mouse_left)
     {
-        rotationOnX -= (mouse_x - event->x());
-        mouse_x = event->x();
+        persTimeX = event->timestamp();
+        persistanceX = mouse_x-event->x();
+        rotationOnX -= mouse_x-event->x();
     }
     if (mouse_middle)
     {
-        rotationOnZ -= (mouse_x - event->x());
-        mouse_x = event->x();
+        persTimeZ = event->timestamp();
+        persistanceZ = mouse_x-event->x();
+        rotationOnZ -= persistanceZ;
     }
     if (mouse_right)
     {
-        rotationOnY -= (mouse_x - event->x());
-        mouse_x = event->x();
-    }
+        persTimeY = event->timestamp();
+        persistanceY = mouse_x-event->x();
+        rotationOnY -= persistanceY;
+    }    
+    mouse_x = event->x();
 }
 void Renderer::setShiftStatus(bool status)
 {
@@ -649,22 +675,38 @@ void Renderer::resetView()
     rotationOnX = 0;
     rotationOnZ = 0;
     rotationOnY = 0;
+    persistanceX = 0;
+    persistanceZ = 0;
+    persistanceY = 0;
 }
 
 void Renderer::setDisplayWireFrame()
 {
     display_mode = 0;
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void Renderer::setDisplayFace()
 {
     display_mode = 1;
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Renderer::setDisplayMultiColored()
 {
     display_mode = 2;
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void Renderer::persistanceRotate()
+{
+    if (!mouse_left)
+    {
+        rotationOnX -= persistanceX;
+    }
+    if (!mouse_middle)
+    {
+        rotationOnZ -= persistanceZ;
+    }
+    if (!mouse_right)
+    {
+        rotationOnY -= persistanceY;
+    }
 }
