@@ -17,6 +17,7 @@
 #include <QVBoxLayout>
 #include <QActionGroup>
 #include <QTimer>
+#include <QRadioButton>
 #include "game.h"
 
 class Renderer;
