@@ -29,11 +29,13 @@ Window::Window(QWidget *parent) :
     mDrawMenu->addAction(mWireframeAction);
     mDrawMenu->addAction(mFillAction);
     mDrawMenu->addAction(mMultiColourAction);
+    mDrawMenu->addAction(mRandomColourAction);
     drawGroup = new QActionGroup(this);
     drawGroup->setExclusive(true);
     drawGroup->addAction(mWireframeAction);
     drawGroup->addAction(mFillAction);
     drawGroup->addAction(mMultiColourAction);
+    drawGroup->addAction(mRandomColourAction);
 
     // Setup the Game menu
     mGameMenu = menuBar()->addMenu(tr("&Game"));
@@ -113,6 +115,11 @@ void Window::createDrawActions()
     mMultiColourAction->setShortcut(QKeySequence(Qt::Key_M));
     mMultiColourAction->setCheckable(true);
     connect(mMultiColourAction, SIGNAL(triggered()), this, SLOT(multicoloured()));
+    // Random shit
+    mRandomColourAction = new QAction(tr("&Random"), this);
+    mRandomColourAction->setShortcut(QKeySequence(Qt::Key_Comma));
+    mRandomColourAction->setCheckable(true);
+    connect(mRandomColourAction, SIGNAL(triggered()), this, SLOT(randomColored()));
 }
 
 // helper function for creating actions
@@ -153,6 +160,10 @@ void Window::multicoloured()
 {
     renderer->setDisplayMultiColored();
 }
+void Window::randomColored()
+{
+    renderer->setDisplayRandomColored();
+}
 
 void Window::pause()
 {
@@ -188,6 +199,7 @@ void Window::speedAuto()
 
 void Window::newGame()
 {
+    gameSpeed = 300;
     game->reset();
 }
 

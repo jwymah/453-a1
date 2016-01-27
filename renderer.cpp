@@ -66,6 +66,7 @@ const float cubeNorms[] = {
     0,0,1,  0,0,1,  0,0,1,
 };
 
+// Convenience cube - used for sizing and initial cube
 const float cubeColors[] = {
     1,1,1,  1,1,1,  1,1,1, // back
     1,1,1,  1,1,1,  1,1,1,
@@ -114,13 +115,6 @@ const float moreCubeColors[][3*3*12] = {
     // black
     {},
 };
-
-float randomColorCube[108] = {};
-float colorFaceTwoTriangles[288];
-float red;
-float green;
-float blue;
-
 
 // constructor
 Renderer::~Renderer()
@@ -173,8 +167,6 @@ void Renderer::initializeGL()
             gameBoard[i][j] = -1;
         }
     }
-    generatorOfSeven = 0;
-    generateRandomCubeColor();
     mouse_x = 0;
     setDisplayFace();
     scale_factor = 1.0f;
@@ -445,55 +437,7 @@ void Renderer::setShiftStatus(bool status)
     shift_pressed = status;
 }
 
-void Renderer::setupBox()
-{
-    long cBufferSize = sizeof(cubeColors) * sizeof(float),
-        vBufferSize = sizeof(unitCube) * sizeof(float),
-        nBufferSize = sizeof(cubeNorms) * sizeof(float);
-
-    glGenBuffers(1, &this->m_boxVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, this->m_boxVbo);
-
-    // Allocate buffer
-    glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL,
-        GL_STATIC_DRAW);
-
-    // Upload the data to the GPU
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &unitCube[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &cubeColors[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
-
-    bindit();
-}
-
-void Renderer::drawBox()
-{
-    long cBufferSize = sizeof(cubeColors) * sizeof(float),
-        vBufferSize = sizeof(unitCube) * sizeof(float),
-        nBufferSize = sizeof(cubeNorms) * sizeof(float);
-    boxSize = vBufferSize + cBufferSize + nBufferSize;
-
-    // Bind to the correct context
-    glBindBuffer(GL_ARRAY_BUFFER, this->m_boxVbo);
-
-    // Enable the attribute arrays
-    glEnableVertexAttribArray(this->m_posAttr);
-    glEnableVertexAttribArray(this->m_colAttr);
-    glEnableVertexAttribArray(this->m_norAttr);
-
-    // Specifiy where these are in the VBO
-    glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(0));
-    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
-    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
-
-    // Draw the triangles
-    glDrawArrays(GL_TRIANGLES, 0, 36); // 36 vertices
-
-    glDisableVertexAttribArray(this->m_posAttr);
-    glDisableVertexAttribArray(this->m_colAttr);
-    glDisableVertexAttribArray(this->m_norAttr);
-}
-
+// Setup the U well
 void Renderer::setupUBorder()
 {
     long cBufferSize = sizeof(cubeColors) * sizeof(float),
@@ -653,16 +597,16 @@ void Renderer::setupGameBoard(int gameBoard[][10])
                 }
                 else if (display_mode == 2)  // multi-face display
                 {
+                    int offset = 0;
                     for (int p=0; p<12; p++)
                     {
-                        generatorOfSeven = rand()%7;
-                        glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + p*144, 144, &moreCubeColors[generatorOfSeven]);
+                        glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + p*144, 144, &moreCubeColors[(gameBoard[r][c] + offset) % 6]);
+                        offset++;
                     }
-//                    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &randomColorCube[gameBoard[r][c]]);
                 }
-                else    // random ass display
+                else    // randomish display
                 {
-                    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &randomColorCube[gameBoard[r][(rand())%gameWidth]]);
+                    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &moreCubeColors[gameBoard[r][(rand())%gameWidth]]);
                 }
                 glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &cubeNorms[0]);
 
@@ -753,8 +697,12 @@ void Renderer::setDisplayFace()
 
 void Renderer::setDisplayMultiColored()
 {
-    generateRandomCubeColor();
     display_mode = 2;
+}
+
+void Renderer::setDisplayRandomColored()
+{
+    display_mode = 3;
 }
 
 void Renderer::persistanceRotate()
@@ -770,18 +718,5 @@ void Renderer::persistanceRotate()
     if (!mouse_right)
     {
         rotationOnY -= persistanceY;
-    }
-}
-
-void Renderer::generateRandomCubeColor()
-{
-    for (int j=0; j<108; j+=6)
-    {
-        randomColorCube[j] =  ((double) rand() / (RAND_MAX));
-        randomColorCube[j+3] =  ((double) rand() / (RAND_MAX));
-        randomColorCube[j+1] =  ((double) rand() / (RAND_MAX));
-        randomColorCube[j+4] =  ((double) rand() / (RAND_MAX));
-        randomColorCube[j+2] =  ((double) rand() / (RAND_MAX));
-        randomColorCube[j+5] =  ((double) rand() / (RAND_MAX));
     }
 }

@@ -46,6 +46,7 @@ private slots:
     void wireframe();
     void face();
     void multicoloured();
+    void randomColored();
 
     void pause();
     void speedUp();
@@ -68,6 +69,7 @@ private:
     QAction * mWireframeAction;
     QAction * mFillAction;
     QAction * mMultiColourAction;
+    QAction * mRandomColourAction;
 
     QMenu * mGameMenu;
     QAction * mPauseAction;

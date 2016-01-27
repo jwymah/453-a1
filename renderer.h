@@ -10,7 +10,6 @@
 
 #include <QWidget>
 #include <QOpenGLWidget>
-//#include <QOpenGLFunctions>
 #include <QOpenGLFunctions_4_2_Core>
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
@@ -32,26 +31,22 @@ public:
     // constructor
     Renderer(QWidget *parent = 0);
 
+    int gameBoard[24][10];
+
     // destructor
     virtual ~Renderer();
 
-    void drawBorder();
-    void setupBorder();
-
-    int gameBoard[24][10];
+    // publicly available since Game instance is inside Window
     void setupGameBoard(int gameBoard[][10]);
-    void drawGameBoard();
 
-    // Stuff called by window.
+    // Stuff for bindings called by window.
     void setShiftStatus(bool status);
     void setDisplayWireFrame();
     void setDisplayFace();
     void setDisplayMultiColored();
-
-    void persistanceRotate();
-
-    // stuff for bindings
+    void setDisplayRandomColored();
     void resetView();
+
 protected:
 
     // override fundamental drawing functions
@@ -78,15 +73,6 @@ protected:
 
 private:
 
-    // member variables for rotations
-    int mouse_x;
-    int display_mode;
-    float scale_factor;
-    bool mouse_left;
-    bool mouse_middle;
-    bool mouse_right;
-    bool shift_pressed;
-
     // member variables for shader manipulation
     GLuint m_programID;
     GLuint m_MMatrixUniform; // model matrix
@@ -99,9 +85,6 @@ private:
     GLuint m_norAttr;
 
     GLuint m_boxVbo;
-
-    GLuint m_boxVao;
-    GLuint m_triangleVao;
 
     GLuint m_borderUVaos[54];
 
@@ -124,6 +107,14 @@ private:
     long boxSize;
     long borderSize;
 
+    // member variables for rotations
+    int mouse_x;
+    int display_mode;
+    float scale_factor;
+    bool mouse_left;
+    bool mouse_middle;
+    bool mouse_right;
+    bool shift_pressed;
     int rotationOnX;
     int rotationOnZ;
     int rotationOnY;
@@ -133,22 +124,18 @@ private:
     long persTimeX;
     long persTimeZ;
     long persTimeY;
-    int generatorOfSeven;
 
     // helper function for loading shaders
     GLuint loadShader(GLenum type, const char *source);
 
     // helper function for drawing bordering triangles
-    void generateBorderTriangles();
-
-    void generateEvenMoreColors();
-    void generateRandomCubeColor();
-
     void setupBorderTriangles();
+    void generateBorderTriangles();
     void drawBorderTriangles();
 
-    void setupBox();
-    void drawBox();
+    //draws the actual game state
+    void drawGameBoard();
+    void persistanceRotate();
 
     void setupUBorder();
     void drawUBorder();

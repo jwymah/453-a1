@@ -1,8 +1,8 @@
 CPSC453 - Assignment 1
 
-NAME:
-UCID Number:
-Tutorial Section:
+NAME: Jeremy mah
+UCID Number: 10053908
+Tutorial Section: T/Th @ 2pm
 
 === 1. EXECUTION: ===
 
@@ -18,25 +18,35 @@ To run the program, on the terminal enter the following command:
 
 === 2. PROGRAM USE: ===
 
-<Insert a precise user manual on how to interact with the program; eg. 
-short-cut keys, mouse movements, menu items, widgets, etc.>
+Cookie cutter of assignment specs. All functionallity is in and no bonus features.
 
 == 3. ALGORITHMS and DESIGN DECISIONS: ===
 
-<Insert a description of the algorithms created and design decisions taken>
+Despite suggestions I used both vbos and vaos.
+The game instance is created and kept within Window object.
+		(wireframe still has colour because specs didn't say it couldn't!)
+All transformations and drawing are kept/called from within Renderer.paintGL().
+
+User input handled in Window, drawing related stuff in Renderer.
 
 === 4. FILES SUBMITTED: ===
 
-<Insert a list of files that have been submitted by the assignment in case
-there is a discrepancy in the submission>
+<unmodified>
+main.cpp
+game.h
+game.cpp
+
+<modified>
+renderer.h
+renderer.cpp
+window.h
+window.cpp
 
 === 5. PROGRAM ASSUMPTIONS: ===
 
-<Insert a short description of any assumptions made>
+Tested in the graphics lab in MS 239
 
 === 6. DECLARATION AND IMAGE PERMISSION: ===
-
-<Initial the following:>
 
 __ I have read the regulations regarding plagarism. I affirm with my initials
 that I have worked on my own solution to this assignment, and the code I am
@@ -44,10 +54,10 @@ submitting is my own.
 
 <Mark with an X if desired. No marks will be deducted either way>
 
-__ I grant the instructor and/or TAs permission to use images submitted and/or
+X_ I grant the instructor and/or TAs permission to use images submitted and/or
    assignment screenshots for future CPSC453 courses.
 
-__ If permission has been granted above, I would prefer the images to remain 
+X_ If permission has been granted above, I would prefer the images to remain 
    annonymous. <Otherwise credit will be given, as is due>
 
 __
